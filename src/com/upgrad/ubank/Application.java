@@ -5,6 +5,7 @@ import com.upgrad.ubank.dtos.Transaction;
 import com.upgrad.ubank.exceptions.AccountAlreadyRegisteredException;
 import com.upgrad.ubank.exceptions.AccountNotFoundException;
 import com.upgrad.ubank.exceptions.IncorrectPasswordException;
+import com.upgrad.ubank.exceptions.InsufficientBalanceException;
 import com.upgrad.ubank.services.*;
 
 import java.util.Scanner;
@@ -152,16 +153,20 @@ public class Application {
     }
 
     private void getAccount () {
-        if (!isLoggedIn) {
-            System.out.println("You are not logged in.");
-            return;
+
+            if (!isLoggedIn) {
+                System.out.println("You are not logged in.");
+                return;
+            }
+
+            System.out.println("*********************");
+            System.out.println("*******Account*******");
+            System.out.println("*********************");
+        try {
+            System.out.println(accountService.getAccount(loggedInAccountNo));
+        }catch(AccountNotFoundException e){
+            System.out.println(e.getMessage());
         }
-
-        System.out.println("*********************");
-        System.out.println("*******Account*******");
-        System.out.println("*********************");
-
-        System.out.println(accountService.getAccount(loggedInAccountNo));
     }
 
     private void deposit () {
@@ -177,6 +182,7 @@ public class Application {
         System.out.print("Amount: ");
         int amount = 0;
 
+
         try {
             amount = Integer.parseInt(scan.nextLine());
         } catch (NumberFormatException e) {
@@ -184,12 +190,18 @@ public class Application {
             return;
         }
 
-        Account account = accountService.deposit(loggedInAccountNo, amount);
-        if (account == null) {
-            System.out.println("Could not deposit into account.");
-        } else {
-            System.out.println("Money successfully deposited into account.");
+        //HW
+        Account account = null;
+
+        try {
+             account = accountService.deposit(loggedInAccountNo, amount);
+                System.out.println("Money successfully deposited into account.");
+        }catch(AccountNotFoundException e){
+            System.out.println(e.getMessage());
         }
+
+
+
     }
 
     private void withdraw () {
@@ -212,12 +224,18 @@ public class Application {
             return;
         }
 
-        Account account = accountService.withdraw(loggedInAccountNo, amount);
-        if (account == null) {
-            System.out.println("Could not withdraw from account.");
-        } else {
-            System.out.println("Money successfully withdrawn from account.");
+        //HW
+        Account account =null;
+        try{
+             account = accountService.withdraw(loggedInAccountNo, amount);
+             System.out.println("Money successfully withdrawn from account.");
+
+        }catch (AccountNotFoundException e){
+            System.out.println(e.getMessage());
+        }catch (InsufficientBalanceException e){
+            System.out.println(e.getMessage());
         }
+
     }
 
     private void getAccountStatement() {
